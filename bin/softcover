@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
 require "softcover"
 
+module Softcover::Utils
+  def chapter_label(chapter_number)
+    "第#{chapter_number}章"
+  end
+end
+
 Softcover::CLI.start
