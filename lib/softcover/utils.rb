@@ -157,7 +157,7 @@ module Softcover::Utils
     # but we want to be able to output a LaTeX style file as well.
     # The inclusion of the ':css' symbol is necessary but doesn't actually
     # result in CSS being output unless the format is 'html'.
-    pygments = Pygments.send(:mentos, :css, [format.to_s, ''])
+    pygments = Pygments::Popen.new.send(:mentos, :css, [format.to_s, ''])
     add_highlight_class!(pygments) if format == :html
     File.open(File.join(path, "pygments.#{extension}"), 'w') do |f|
       f.write(pygments)
@@ -260,9 +260,8 @@ module Softcover::Utils
       get_filename(:'ebook-convert')
     when :epubcheck
       # Finds EpubCheck anywhere on the path.
-      version_3 = path('epubcheck-3.0/epubcheck-3.0.jar')
-      version_4 = path('epubcheck-4.0.1/epubcheck.jar')
-      first_path(version_4) || first_path(version_3) || get_filename(:'epubcheck') || ""
+      version_4 = path('epubcheck-4.0.2/epubcheck.jar')
+      first_path(version_4) || get_filename(:'epubcheck') || ""
     when :inkscape
       default = '/Applications/Inkscape.app/Contents/Resources/bin/inkscape'
       filename_or_default(:inkscape, default)
@@ -275,6 +274,12 @@ module Softcover::Utils
       else
         ""
       end
+    when :python2
+      python = get_filename(:python)
+      # Python 2 stupidly outputs the version number to STDERR instead of STDOUT.
+      require 'open3'
+      stdout, stderr, status = Open3.capture3("#{python} --version")
+      stderr.match(/Python 2/) ? python : ""
     else
       get_filename(label)
     end
@@ -325,5 +330,11 @@ module Softcover::Utils
   ensure
     stream.reopen(old_stream)
     old_stream.close
+  end
+
+  # Run text through the Polytexnic pipeline to make an HTML snippet.
+  def polytexnic_html(text)
+    Nokogiri::HTML(Polytexnic::Pipeline.new(text).to_html).at_css('p')
+                                                         .inner_html.strip
   end
 end

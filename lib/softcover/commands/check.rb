@@ -44,6 +44,7 @@ module Softcover
          [:java,        'Java'],
          [:zip,         'zip'],
          [:epubcheck,   'EpubCheck'],
+         [:python2,     'Python 2']
         ]
       end
 
@@ -58,40 +59,41 @@ module Softcover
       def missing_dependency_message(label)
         case label
         when :latex
-          message  = "LaTeX (http://latex-project.org/ftp.html)\n"
+          message  = "LaTeX (https://latex-project.org/ftp.html)\n"
           message += "      ∟ Huge download—start it now!"
         when :ghostscript
           message  = "GhostScript (should come with LaTeX)\n"
         when :convert
-          "ImageMagick (http://www.imagemagick.org/script/binary-releases.php)"
+          "ImageMagick (https://www.imagemagick.org/script/download.php)"
         when :node
-          "NodeJS (http://nodejs.org/)"
+          "NodeJS (https://nodejs.org/)"
         when :phantomjs
-          message = "PhantomJS (http://phantomjs.org/)\n"
+          message = "PhantomJS (https://phantomjs.org/download.html)\n"
           message += "      ∟ Put bin/phantomjs version 2 somewhere on your path,"
           message += " e.g., in /usr/local/bin"
         when :kindlegen
-          url = 'http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211'
+          url = 'https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211'
           message = "KindleGen (#{url})\n"
           message += "      ∟ Put the kindlegen executable on your path,"
           message += " e.g., in /usr/local/bin"
         when :calibre
-          url = 'http://calibre-ebook.com/'
+          url = 'https://calibre-ebook.com/'
           message  = "Calibre (#{url})\n"
           message += "      ∟ Enable Calibre command-line tools"
-          message += " (http://manual.calibre-ebook.com/generated/en/cli-index.html)"
+          message += " (https://manual.calibre-ebook.com/generated/en/cli-index.html)"
         when :java
-          url = 'http://www.java.com/en/download/help/index_installing.xml'
+          url = 'https://www.java.com/en/download/help/index_installing.xml'
           "Java (#{url})"
         when :zip
           "Install zip (e.g., apt-get install zip)"
         when :epubcheck
-          url  = 'https://github.com/IDPF/epubcheck/releases/'
-          url += 'download/v4.0.1/epubcheck-4.0.1.zip'
-          message  = "EpubCheck 4.0.1 (#{url})\n"
-          message += "      ∟ Unzip and place epubcheck-4.0.1/ in a directory on your path"
+          url  = 'https://github.com/IDPF/epubcheck/releases/download/v4.0.2/epubcheck-4.0.2.zip'
+          message  = "EpubCheck 4.0.2 (#{url})\n"
+          message += "      ∟ Unzip and place epubcheck-4.0.2/ in a directory on your path"
         when :inkscape
-          message  = "Inkscape (http://inkscape.org/)"
+          message  = "Inkscape (https://inkscape.org/)"
+        when :python2
+          message = "Configure your shell so that `python` runs Python 2"
         else
           raise "Unknown label #{label}"
         end
@@ -104,6 +106,7 @@ module Softcover
       # Simulate working for given time.
       # `softcover check` is more satisfying if it looks like it's doing work.
       def simulate_work(time)
+        return
         sleep time unless Softcover::test?
       end
 

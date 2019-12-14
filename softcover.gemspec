@@ -18,18 +18,18 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency 'polytexnic', '~> 1.2.4'
-  gem.add_dependency 'msgpack', '~> 0.4.2'
-  gem.add_dependency 'nokogiri', '~> 1.6.0'
+  gem.add_dependency 'polytexnic', '~> 1.5.0'
+  gem.add_dependency 'msgpack', '~> 1.2.0'
+  gem.add_dependency 'nokogiri', '~> 1.8.1'
   gem.add_dependency 'thor', '~> 0.18.1'
   gem.add_dependency 'activesupport', '~> 4.2.3'
   gem.add_dependency 'i18n', '~> 0.7.0'
-  gem.add_dependency 'rest-client', '~> 1.6.7'
-  gem.add_dependency 'curb', '~> 0.8.5'
+  gem.add_dependency 'rest-client', '~> 1.8.0'
+  gem.add_dependency 'curb', '~> 0.9.7'
   gem.add_dependency 'ruby-progressbar', '~> 1.4.2'
   gem.add_dependency 'maruku', '~> 0.7.1'
-  gem.add_dependency 'pygments.rb', '~> 0.6.0'
-  gem.add_dependency 'kramdown', '~> 1.5.0'
+  gem.add_dependency 'pygments.rb', '~> 1.2.1'
+  gem.add_dependency 'kramdown', '~> 1.14.0'
 
   gem.add_dependency 'sinatra', '~> 1.4.4'
   gem.add_dependency 'thin', '~> 1.6.1'
@@ -38,5 +38,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'coffee-script', '~> 2.2.0'
   gem.add_dependency 'listen', '~> 1.3.1'
   gem.add_dependency 'rb-fsevent', '~> 0.9.3'
-  gem.add_dependency 'sanitize', '~> 4.0.1'
+  gem.add_dependency 'sanitize', '~> 4.6.3'
 end

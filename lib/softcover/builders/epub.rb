@@ -52,7 +52,7 @@ module Softcover
     end
 
     # Returns a content.opf file based on a valid template.
-    def content_opf_template(title, copyright, author, uuid, cover_id,
+    def content_opf_template(escaped_title, copyright, author, uuid, cover_id,
                              toc_chapters, manifest_chapters, images)
       if cover_id
         cover_meta = %(<meta name="cover" content="#{cover_id}"/>)
@@ -65,10 +65,10 @@ module Softcover
 <package unique-identifier="BookID" version="3.0" xmlns="http://www.idpf.org/2007/opf">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/"
       xmlns:opf="http://www.idpf.org/2007/opf">
-      <dc:title>#{escape(title)}</dc:title>
+      <dc:title>#{escaped_title}</dc:title>
       <dc:language>en</dc:language>
       <dc:rights>Copyright (c) #{copyright} #{escape(author)}</dc:rights>
-      <dc:creator>#{author}</dc:creator>
+      <dc:creator>#{escape(author)}</dc:creator>
       <dc:publisher>Softcover</dc:publisher>
       <dc:identifier id="BookID">urn:uuid:#{uuid}</dc:identifier>
       <meta property="dcterms:modified">#{Time.now.strftime('%Y-%m-%dT%H:%M:%S')}Z</meta>
@@ -96,7 +96,7 @@ module Softcover
     end
 
     # Returns a toc.ncx file based on a valid template.
-    def toc_ncx_template(title, uuid, chapter_nav)
+    def toc_ncx_template(escaped_title, uuid, chapter_nav)
 %(<?xml version="1.0" encoding="UTF-8"?>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
     <head>
@@ -106,7 +106,7 @@ module Softcover
         <meta name="dtb:maxPageNumber" content="0"/>
     </head>
     <docTitle>
-        <text>#{escape(title)}</text>
+        <text>#{escaped_title}</text>
     </docTitle>
     <navMap>
       #{chapter_nav.join("\n")}
@@ -116,16 +116,16 @@ module Softcover
     end
 
     # Returns the navigation HTML based on a valid template.
-    def nav_html_template(title, nav_list)
+    def nav_html_template(escaped_title, nav_list)
 %(<?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
     <head>
         <meta charset="UTF-8" />
-        <title>#{title}</title>
+        <title>#{escaped_title}</title>
     </head>
     <body>
         <nav epub:type="toc">
-            <h1>#{escape(title)}</h1>
+            <h1>#{escaped_title}</h1>
             <ol>
               #{nav_list.join("\n")}
             </ol>
@@ -311,6 +311,14 @@ module Softcover
           # Save the SVG file.
           svg['viewBox'] = svg['viewbox']
           svg.remove_attribute('viewbox')
+          # Workaround for bug in Inkscape 0.91 on MacOS X:
+          # extract height/width from svg attributes and move them to style attr
+          svg_height = svg['height']  # in ex
+          svg_width = svg['width']    # in ex
+          svg['style'] += ' height:'+svg_height+';' + ' width:'+svg_width+';'
+          svg.remove_attribute('height')
+          svg.remove_attribute('width')
+          # /Workaround
           first_child = frame.children.first
           first_child.replace(svg) unless svg == first_child
           output = svg.to_xhtml
@@ -322,25 +330,20 @@ module Softcover
           png_abspath = svg_abspath.sub('.svg', '.png')
           pngs << png_filename
           #
-          # Settings for inline math in ePub / mobi
+          # Settings for texmath images in ePub / mobi
           ex2em_height_scaling = 0.51     # =1ex/1em for math png height
           ex2em_valign_scaling = 0.481482 # =1ex/1em for math png vertical-align
           ex2pt_scale_factor = 15         # =1ex/1pt scaling for SVG-->PNG conv.
-          # These are used a three-step process below: Extract, Convert, Replace
-          # STEP1: Extract information from svg tag.
-          svg_height = svg['height']
-          if svg_height
-            svg_height_in_ex = Float(svg_height.gsub('ex',''))
-            # MathJax sets SVG height in `ex` units but we want em units for PNG
-            png_height = (svg_height_in_ex * ex2em_height_scaling).to_s + 'em'
-          end
-          # Extract vertical-align css proprty for for inline math.
+          # These are used a three-step process below: Compute, Convert, Replace
+          # STEP1: compute height and vertical-align in `em` units
+          svg_height_in_ex = Float(svg_height.gsub('ex',''))
+          # MathJax sets SVG height in `ex` units but we want `em` units for PNG
+          png_height = (svg_height_in_ex * ex2em_height_scaling).to_s + 'em'
+          # Extract vertical-align css proprty for inline math equations:
           if svg.parent.parent.attr('class') == "inline_math"
             vertical_align = svg['style'].scan(/vertical-align: (.*?);/).flatten.first
             if vertical_align
               valign_in_ex = Float(vertical_align.gsub('ex',''))
-              valign_in_ex += 0.1155  # correction factor for MathJax 1px margin
-              # png vertical-align in ems is the css equivalent of depth in TeX
               png_valign = (valign_in_ex * ex2em_valign_scaling).to_s + 'em'
             else
               png_valign = "0em"
@@ -348,7 +351,7 @@ module Softcover
           else # No vertical align for displayed math
             png_valign = nil
           end
-          # STEP2: Generate PNG from each SVG (if necessary).
+          # STEP2: Generate PNG from each SVG (unless PNG exists already).
           unless File.exist?(png_filename)
             h = ex2pt_scale_factor * svg_height_in_ex       # = PNG height in pt
             unless options[:silent] || options[:quiet]
@@ -542,7 +545,9 @@ module Softcover
                    id = "img-#{label}"
                    %(<item id="#{id}" href="#{href}" media-type="image/#{ext}"/>)
                  end
-        content_opf_template(manifest.title, manifest.copyright,
+
+        manifest.html_title
+        content_opf_template(manifest.html_title, manifest.copyright,
                              manifest.author, manifest.uuid, cover_id(options),
                              toc_ch, man_ch, images)
       end
@@ -587,7 +592,7 @@ module Softcover
             chapter_nav << %(</navPoint>)
           end
         end
-        toc_ncx_template(manifest.title, manifest.uuid, chapter_nav)
+        toc_ncx_template(manifest.html_title, manifest.uuid, chapter_nav)
       end
 
       def chapter_name(n)
@@ -612,7 +617,7 @@ module Softcover
                        %(<li>#{element}</li>)
                      end
         end
-        nav_html_template(manifest.title, nav_list)
+        nav_html_template(manifest.html_title, nav_list)
       end
 
       # Returns a navigation link for the chapter.
