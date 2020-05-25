@@ -40,7 +40,6 @@ module Softcover
          [:phantomjs,   'PhantomJS'],
          [:inkscape,    'Inkscape'],
          [:calibre,     'Calibre'],
-         [:kindlegen,   'KindleGen'],
          [:java,        'Java'],
          [:zip,         'zip'],
          [:epubcheck,   'EpubCheck'],
@@ -71,11 +70,6 @@ module Softcover
           message = "PhantomJS (https://phantomjs.org/download.html)\n"
           message += "      ∟ Put bin/phantomjs version 2 somewhere on your path,"
           message += " e.g., in /usr/local/bin"
-        when :kindlegen
-          url = 'https://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211'
-          message = "KindleGen (#{url})\n"
-          message += "      ∟ Put the kindlegen executable on your path,"
-          message += " e.g., in /usr/local/bin"
         when :calibre
           url = 'https://calibre-ebook.com/'
           message  = "Calibre (#{url})\n"
@@ -87,9 +81,9 @@ module Softcover
         when :zip
           "Install zip (e.g., apt-get install zip)"
         when :epubcheck
-          url  = 'https://github.com/IDPF/epubcheck/releases/download/v4.0.2/epubcheck-4.0.2.zip'
-          message  = "EpubCheck 4.0.2 (#{url})\n"
-          message += "      ∟ Unzip and place epubcheck-4.0.2/ in a directory on your path"
+          url  = 'https://github.com/w3c/epubcheck/releases/download/v4.2.2/epubcheck-4.2.2.zip'
+          message  = "EpubCheck 4.2.2 (#{url})\n"
+          message += "      ∟ Unzip and place epubcheck-4.2.2/ in a directory on your path"
         when :inkscape
           message  = "Inkscape (https://inkscape.org/)"
         when :python2

@@ -260,10 +260,10 @@ module Softcover::Utils
       get_filename(:'ebook-convert')
     when :epubcheck
       # Finds EpubCheck anywhere on the path.
-      version_4 = path('epubcheck-4.0.2/epubcheck.jar')
+      version_4 = path('epubcheck-4.2.2/epubcheck.jar')
       first_path(version_4) || get_filename(:'epubcheck') || ""
     when :inkscape
-      default = '/Applications/Inkscape.app/Contents/Resources/bin/inkscape'
+      default = '/Applications/Inkscape.app/Contents/MacOS/inkscape'
       filename_or_default(:inkscape, default)
     when :phantomjs
       phantomjs = get_filename(label)
@@ -275,7 +275,7 @@ module Softcover::Utils
         ""
       end
     when :python2
-      python = get_filename(:python)
+      python = get_filename(:python2)
       # Python 2 stupidly outputs the version number to STDERR instead of STDOUT.
       require 'open3'
       stdout, stderr, status = Open3.capture3("#{python} --version")
